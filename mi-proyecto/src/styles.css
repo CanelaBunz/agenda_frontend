@@ -1,0 +1,212 @@
+/* Estilos generales */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+  overflow: hidden;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  background-color: #fff;
+}
+
+.dark-mode {
+  background-color: #333;
+  color: #fff;
+}
+
+.dark-mode .banner {
+  background-color: #222;
+  color: #fff;
+}
+
+.dark-mode .contact-sidebar {
+  background-color: #444;
+  color: #fff;
+}
+
+.dark-mode .calendar-component {
+  background-color: #555;
+  color: #fff;
+}
+
+/* Estilos del banner */
+.banner {
+  background-color: #3498db;
+  color: #fff;
+  padding: 15px 20px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-bottom: 2px solid #2980b9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.banner span {
+  flex: 1;
+  text-align: center;
+}
+
+/* Estilos de los botones */
+.p-button-text.p-button-plain {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.p-button-text.p-button-plain:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Estilos del contenido principal */
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.contact-sidebar {
+  width: 250px;
+  background-color: #2c3e50;
+  color: #2a859c;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.calendar-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* Estilos del modal de contactos */
+.p-dialog .p-fluid .p-field {
+  margin-bottom: 1rem;
+}
+
+.p-dialog .p-fluid .p-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Estilos de la lista de contactos */
+.contact-sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.contact-sidebar ul li {
+  background-color: #f9f9f9;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.contact-sidebar ul li strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+.contact-sidebar ul li p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Estilos para el contenedor del calendario */
+.calendar-component {
+  flex: 1;
+  overflow: auto; /* Permite el scroll */
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-height: calc(100vh - 200px); /* Limita la altura */
+}
+
+/* Estilos para la barra de herramientas del calendario */
+.fc-header-toolbar {
+  margin-bottom: 10px;
+}
+
+.fc-button {
+  background-color: #3498db !important;
+  border-color: #3498db !important;
+  color: white !important;
+}
+
+.fc-button:hover {
+  background-color: #2980b9 !important;
+  border-color: #2980b9 !important;
+}
+
+/* Estilos para centrar el panel */
+.login-page,
+.register-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Ocupa toda la altura de la pantalla */
+  background-color: #f4f4f9; /* Fondo claro */
+}
+
+.login-page .p-card,
+.register-page .p-card {
+  width: 100%;
+  max-width: 400px; /* Ancho máximo del card */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  background-color: #ffffff; /* Fondo blanco */
+}
+
+.login-page h2,
+.register-page h2 {
+  color: #3498db; /* Color azul para el título */
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-page .p-field,
+.register-page .p-field {
+  margin-bottom: 1.5rem;
+}
+
+.login-page .p-field label,
+.register-page .p-field label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.login-page .p-button,
+.register-page .p-button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.login-page .p-button-secondary,
+.register-page .p-button-secondary {
+  background-color: #6c757d; /* Color gris para el botón secundario */
+  border-color: #6c757d;
+}
+
+.login-page .p-button-secondary:hover,
+.register-page .p-button-secondary:hover {
+  background-color: #5a6268; /* Color gris más oscuro al pasar el mouse */
+  border-color: #545b62;
+}
