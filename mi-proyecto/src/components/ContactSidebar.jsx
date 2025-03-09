@@ -1,44 +1,57 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import api from "../services/api";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
-import "primeicons/primeicons.css";
+import { Toast } from "primereact/toast";
+import * as yup from "yup";
 
 const ContactSidebar = () => {
   const [contacts, setContacts] = useState([]);
-  const [contactDialogVisible, setContactDialogVisible] = useState(false);
-  const [editContactDialogVisible, setEditContactDialogVisible] = useState(false);
   const [newContact, setNewContact] = useState({
     name: "",
     email: "",
     phone: "",
-    note: "",
+    notes: "",
   });
-  const [editingContact, setEditingContact] = useState(null);
+  const [editContact, setEditContact] = useState(null);
+  const [visibleDialog, setVisibleDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const toast = useRef(null);
 
-  // Abrir modal para crear contacto
-  const openContactDialog = () => {
-    setContactDialogVisible(true);
-  };
+  // Esquema de validación con Yup
+  const contactSchema = yup.object().shape({
+    name: yup.string().required("El nombre es obligatorio."),
+    email: yup.string().email("Correo electrónico inválido.").required("El correo electrónico es obligatorio."),
+    phone: yup.string().optional(),
+    notes: yup.string().optional(),
+  });
 
-  // Cerrar modal para crear contacto
-  const closeContactDialog = () => {
-    setContactDialogVisible(false);
-    setNewContact({ name: "", email: "", phone: "", note: "" });
-  };
+  // Obtener contactos al cargar el componente
+  useEffect(() => {
+    fetchContacts();
+  }, []);
 
-  // Abrir modal para editar contacto
-  const openEditContactDialog = (contact) => {
-    setEditingContact(contact);
-    setEditContactDialogVisible(true);
-  };
+  // Función para obtener contactos
+  const fetchContacts = async () => {
+    setLoading(true);
+    try {
+      const response = await api.getContacts();
 
-  // Cerrar modal para editar contacto
-  const closeEditContactDialog = () => {
-    setEditContactDialogVisible(false);
-    setEditingContact(null);
+      // Verifica si la respuesta tiene un campo `data` y es un array
+      if (response.data && Array.isArray(response.data.data)) {
+        setContacts(response.data.data); // Usa response.data.data
+      } else {
+        console.error("La respuesta de la API no es un array:", response.data);
+        setContacts([]); // Asignar un array vacío si la respuesta no es válida
+      }
+    } catch (error) {
+      console.error("Error al cargar contactos:", error);
+      showError("Error al cargar contactos.");
+      setContacts([]); // Asignar un array vacío en caso de error
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Manejar cambios en los campos del formulario
@@ -47,112 +60,154 @@ const ContactSidebar = () => {
     setNewContact((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Manejar cambios en los campos del formulario de edición
-  const handleEditInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditingContact((prev) => ({ ...prev, [name]: value }));
+  // Mostrar notificaciones de éxito
+  const showSuccess = (message) => {
+    toast.current.show({
+      severity: "success",
+      summary: "Éxito",
+      detail: message,
+    });
   };
 
-  // Validar email
-  const validateEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
+  // Mostrar notificaciones de error
+  const showError = (message) => {
+    toast.current.show({
+      severity: "error",
+      summary: "Error",
+      detail: message,
+    });
   };
 
-  // Guardar nuevo contacto
-  const saveContact = () => {
-    if (!newContact.name || !newContact.email) {
-      alert("Por favor, completa al menos el nombre y el email del contacto.");
-      return;
-    }
+  // Guardar o actualizar un contacto
+  const saveContact = async () => {
+    try {
+      await contactSchema.validate(newContact, { abortEarly: false });
 
-    if (!validateEmail(newContact.email)) {
-      alert("Por favor, introduce un email válido.");
-      return;
-    }
+      console.log("Datos a enviar:", newContact); // Verifica los datos antes de enviar
 
-    const contact = {
-      ...newContact,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    setContacts((prev) => [...prev, contact]);
-    closeContactDialog();
+      let response;
+      if (editContact) {
+        response = await api.updateContact(editContact.id, newContact);
+        showSuccess("Contacto actualizado correctamente.");
+      } else {
+        response = await api.createContact(newContact);
+        showSuccess("Contacto creado correctamente.");
+      }
+
+      // Actualizar el estado `contacts` con el nuevo contacto
+      if (response.data) {
+        setContacts((prevContacts) => {
+          if (editContact) {
+            // Si es una edición, reemplaza el contacto existente
+            return prevContacts.map((contact) =>
+              contact.id === editContact.id ? response.data.data : contact
+            );
+          } else {
+            // Si es un nuevo contacto, agrégalo al estado
+            return [...prevContacts, response.data.data];
+          }
+        });
+      }
+
+      setVisibleDialog(false);
+      setNewContact({ name: "", email: "", phone: "", notes: "" });
+      setEditContact(null);
+    } catch (error) {
+      if (error.name === "ValidationError") {
+        error.inner.forEach((err) => {
+          showError(err.message);
+        });
+      } else if (error.response && error.response.status === 422) {
+        // Manejar errores de validación del servidor
+        const { errors } = error.response.data;
+        if (errors.email) {
+          showError(errors.email[0]); // Mostrar el mensaje de error del servidor
+        } else {
+          showError("Error de validación en el servidor.");
+        }
+      } else {
+        console.error("Error al guardar el contacto:", error);
+        showError("Error al guardar el contacto.");
+      }
+    }
   };
 
-  // Actualizar contacto existente
-  const updateContact = () => {
-    if (!editingContact.name || !editingContact.email) {
-      alert("Por favor, completa al menos el nombre y el email del contacto.");
-      return;
-    }
-
-    if (!validateEmail(editingContact.email)) {
-      alert("Por favor, introduce un email válido.");
-      return;
-    }
-
-    const updatedContacts = contacts.map((contact) =>
-      contact.created_at === editingContact.created_at
-        ? { ...editingContact, updated_at: new Date().toISOString() }
-        : contact
-    );
-    setContacts(updatedContacts);
-    closeEditContactDialog();
+  // Abrir diálogo para editar un contacto
+  const openEditDialog = (contact) => {
+    setEditContact(contact);
+    setNewContact({
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+      notes: contact.notes,
+    });
+    setVisibleDialog(true);
   };
 
-  // Eliminar contacto
-  const deleteContact = (contactToDelete) => {
-    const updatedContacts = contacts.filter(
-      (contact) => contact.created_at !== contactToDelete.created_at
-    );
-    setContacts(updatedContacts);
+  // Eliminar un contacto
+  const deleteContact = async (id) => {
+    try {
+      await api.deleteContact(id);
+      fetchContacts(); // Recargar la lista de contactos
+      showSuccess("Contacto eliminado correctamente.");
+    } catch (error) {
+      console.error("Error al eliminar el contacto:", error);
+      showError("Error al eliminar el contacto.");
+    }
   };
 
   return (
-    <div className="contact-sidebar">
+    <div className="sidebar">
+      <Toast ref={toast} />
       <h3>Contactos</h3>
-
-      {/* Botón para crear contacto */}
       <Button
-        label="Crear Contacto"
+        label="Nuevo Contacto"
         icon="pi pi-plus"
-        onClick={openContactDialog}
+        onClick={() => {
+          setEditContact(null);
+          setNewContact({ name: "", email: "", phone: "", notes: "" });
+          setVisibleDialog(true);
+        }}
         className="p-button-sm"
-        style={{ marginBottom: "10px" }}
       />
 
-      {/* Lista de contactos */}
-      <ul>
-        {contacts.map((contact, index) => (
-          <li
-            key={index}
-            onClick={() => openEditContactDialog(contact)}
-            style={{ cursor: "pointer" }}
-          >
-            <strong>{contact.name}</strong>
-            <p>Email: {contact.email}</p>
-            <p>Teléfono: {contact.phone}</p>
-            <p>Nota: {contact.note}</p>
-            <Button
-              label="Eliminar"
-              icon="pi pi-trash"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteContact(contact);
-              }}
-              className="p-button-danger p-button-sm"
-            />
-          </li>
-        ))}
-      </ul>
+      {loading ? (
+        <p>Cargando contactos...</p>
+      ) : (
+        <div className="contact-cards">
+          {contacts.map((contact) => (
+            <div key={contact.id} className="contact-card">
+              <div className="contact-info">
+                <strong>{contact.name}</strong>
+                <p>{contact.email}</p>
+                <p>{contact.phone}</p>
+                <p>{contact.notes}</p>
+              </div>
+              <div className="contact-actions">
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-text"
+                  onClick={() => openEditDialog(contact)}
+                />
+                <Button
+                  icon="pi pi-trash"
+                  className="p-button-text"
+                  onClick={() => deleteContact(contact.id)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {/* Modal para crear contacto */}
       <Dialog
-        header="Crear Contacto"
-        visible={contactDialogVisible}
-        onHide={closeContactDialog}
-        style={{ width: "400px" }}
+        header={editContact ? "Editar Contacto" : "Nuevo Contacto"}
+        visible={visibleDialog}
+        onHide={() => {
+          setVisibleDialog(false);
+          setEditContact(null);
+          setNewContact({ name: "", email: "", phone: "", notes: "" });
+        }}
       >
         <div className="p-fluid">
           <div className="p-field">
@@ -165,7 +220,7 @@ const ContactSidebar = () => {
             />
           </div>
           <div className="p-field">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Correo Electrónico</label>
             <InputText
               id="email"
               name="email"
@@ -183,88 +238,17 @@ const ContactSidebar = () => {
             />
           </div>
           <div className="p-field">
-            <label htmlFor="note">Nota</label>
+            <label htmlFor="notes">Nota</label>
             <InputText
-              id="note"
-              name="note"
-              value={newContact.note}
+              id="notes"
+              name="notes"
+              value={newContact.notes}
               onChange={handleInputChange}
             />
           </div>
-        </div>
-        <div style={{ marginTop: "20px", textAlign: "right" }}>
           <Button
-            label="Cancelar"
-            icon="pi pi-times"
-            onClick={closeContactDialog}
-            className="p-button-text"
-          />
-          <Button
-            label="Guardar"
-            icon="pi pi-check"
+            label={editContact ? "Actualizar" : "Guardar"}
             onClick={saveContact}
-            autoFocus
-          />
-        </div>
-      </Dialog>
-
-      {/* Modal para editar contacto */}
-      <Dialog
-        header="Editar Contacto"
-        visible={editContactDialogVisible}
-        onHide={closeEditContactDialog}
-        style={{ width: "400px" }}
-      >
-        <div className="p-fluid">
-          <div className="p-field">
-            <label htmlFor="name">Nombre</label>
-            <InputText
-              id="name"
-              name="name"
-              value={editingContact?.name || ""}
-              onChange={handleEditInputChange}
-            />
-          </div>
-          <div className="p-field">
-            <label htmlFor="email">Email</label>
-            <InputText
-              id="email"
-              name="email"
-              value={editingContact?.email || ""}
-              onChange={handleEditInputChange}
-            />
-          </div>
-          <div className="p-field">
-            <label htmlFor="phone">Teléfono</label>
-            <InputText
-              id="phone"
-              name="phone"
-              value={editingContact?.phone || ""}
-              onChange={handleEditInputChange}
-            />
-          </div>
-          <div className="p-field">
-            <label htmlFor="note">Nota</label>
-            <InputText
-              id="note"
-              name="note"
-              value={editingContact?.note || ""}
-              onChange={handleEditInputChange}
-            />
-          </div>
-        </div>
-        <div style={{ marginTop: "20px", textAlign: "right" }}>
-          <Button
-            label="Cancelar"
-            icon="pi pi-times"
-            onClick={closeEditContactDialog}
-            className="p-button-text"
-          />
-          <Button
-            label="Guardar"
-            icon="pi pi-check"
-            onClick={updateContact}
-            autoFocus
           />
         </div>
       </Dialog>

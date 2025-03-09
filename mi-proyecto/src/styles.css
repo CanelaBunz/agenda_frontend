@@ -1,212 +1,177 @@
-/* Estilos generales */
+/* Eliminar márgenes y paddings predeterminados del body y html */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Arial', sans-serif;
-  background-color: #f4f4f9;
-  color: #333;
-  overflow: hidden;
+  overflow: hidden; /* Evita el desplazamiento global */
 }
 
+/* Estilos para el contenedor principal */
 .app-container {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: 100vh;
-  background-color: #fff;
+  height: 100vh; /* Ocupa toda la altura de la ventana */
+  background-color: #ffffff;
 }
 
-.dark-mode {
-  background-color: #333;
-  color: #fff;
-}
-
-.dark-mode .banner {
-  background-color: #222;
-  color: #fff;
-}
-
-.dark-mode .contact-sidebar {
-  background-color: #444;
-  color: #fff;
-}
-
-.dark-mode .calendar-component {
-  background-color: #555;
-  color: #fff;
-}
-
-/* Estilos del banner */
+/* Estilos para el banner */
 .banner {
-  background-color: #3498db;
-  color: #fff;
-  padding: 15px 20px;
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  border-bottom: 2px solid #2980b9;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0; /* Evita que el banner se encoja */
 }
 
 .banner span {
-  flex: 1;
-  text-align: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0 auto;
 }
 
-/* Estilos de los botones */
-.p-button-text.p-button-plain {
-  background: none;
-  border: none;
-  box-shadow: none;
+.banner .p-button {
+  margin-left: 10px;
 }
 
-.p-button-text.p-button-plain:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* Estilos del contenido principal */
+/* Estilos para el contenido principal */
 .main-content {
   display: flex;
   flex: 1;
-  overflow: hidden;
+  overflow: hidden; /* Evita el desplazamiento en el contenedor principal */
 }
 
-.contact-sidebar {
-  width: 250px;
-  background-color: #2c3e50;
-  color: #2a859c;
-  padding: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
+/* Estilos para el sidebar */
+.sidebar {
+  width: 300px; /* Ancho fijo para el sidebar */
+  background-color: #f8f9fa;
+  border-right: 1px solid #ddd;
+  overflow-y: auto; /* Desplazamiento vertical solo dentro del sidebar */
+  height: 100%; /* Ocupa todo el alto disponible */
 }
 
-.calendar-container {
-  flex: 1;
+/* Estilos para las tarjetas de contactos */
+.contact-cards {
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  overflow: hidden;
+  gap: 10px;
+  padding: 20px; /* Padding interno para las tarjetas */
 }
 
-/* Estilos del modal de contactos */
-.p-dialog .p-fluid .p-field {
-  margin-bottom: 1rem;
+.contact-card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.p-dialog .p-fluid .p-field label {
-  display: block;
-  margin-bottom: 0.5rem;
+.contact-info {
+  flex: 1;
 }
 
-/* Estilos de la lista de contactos */
-.contact-sidebar ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.contact-sidebar ul li {
-  background-color: #f9f9f9;
-  margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.contact-sidebar ul li strong {
-  display: block;
-  font-size: 1.1rem;
-  margin-bottom: 5px;
-}
-
-.contact-sidebar ul li p {
+.contact-info p {
   margin: 5px 0;
-  font-size: 0.9rem;
   color: #555;
 }
 
-/* Estilos para el contenedor del calendario */
-.calendar-component {
-  flex: 1;
-  overflow: auto; /* Permite el scroll */
-  background-color: #fff;
-  border-radius: 5px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  max-height: calc(100vh - 200px); /* Limita la altura */
-}
-
-/* Estilos para la barra de herramientas del calendario */
-.fc-header-toolbar {
-  margin-bottom: 10px;
-}
-
-.fc-button {
-  background-color: #3498db !important;
-  border-color: #3498db !important;
-  color: white !important;
-}
-
-.fc-button:hover {
-  background-color: #2980b9 !important;
-  border-color: #2980b9 !important;
-}
-
-/* Estilos para centrar el panel */
-.login-page,
-.register-page {
+.contact-actions {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh; /* Ocupa toda la altura de la pantalla */
-  background-color: #f4f4f9; /* Fondo claro */
+  gap: 10px;
 }
 
-.login-page .p-card,
-.register-page .p-card {
-  width: 100%;
-  max-width: 400px; /* Ancho máximo del card */
+/* Estilos para el calendario */
+.calendar-container {
+  flex: 1; /* El calendario ocupa el espacio restante */
+  overflow: hidden; /* Evita el desplazamiento en el calendario */
+  padding: 20px; /* Padding restaurado para el calendario */
+}
+
+/* Estilos para el modo oscuro */
+.dark-mode {
+  background-color: #2c3e50;
+  color: #000000;
+}
+
+.dark-mode .sidebar {
+  background-color: #34495e;
+  border-right-color: #2c3e50;
+}
+
+.dark-mode .contact-card {
+  background-color: #616d7a;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+.dark-mode .contact-info p {
+  color: #ddd;
+}
+
+.dark-mode .p-button {
+  color: #ffffff;
+}
+
+/* Estilos para el modal de eventos */
+.events-modal {
+  width: 800px;
+}
+
+.events-modal .p-fluid {
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
-  background-color: #ffffff; /* Fondo blanco */
 }
 
-.login-page h2,
-.register-page h2 {
-  color: #3498db; /* Color azul para el título */
-  text-align: center;
-  margin-bottom: 20px;
+.event-item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
 }
 
-.login-page .p-field,
-.register-page .p-field {
-  margin-bottom: 1.5rem;
+.event-item h3 {
+  margin: 0;
+  font-size: 1.2rem;
 }
 
-.login-page .p-field label,
-.register-page .p-field label {
+.event-item p {
+  margin: 5px 0;
+  color: #555;
+}
+
+/* Estilos para el diálogo de eventos */
+.event-dialog {
+  width: 450px;
+}
+
+.event-dialog .p-fluid {
+  padding: 20px;
+}
+
+.event-dialog .p-field {
+  margin-bottom: 15px;
+}
+
+.event-dialog .p-field label {
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 5px;
   display: block;
 }
 
-.login-page .p-button,
-.register-page .p-button {
+.event-dialog .p-field .p-inputtext,
+.event-dialog .p-field .p-calendar {
   width: 100%;
-  margin-top: 10px;
 }
 
-.login-page .p-button-secondary,
-.register-page .p-button-secondary {
-  background-color: #6c757d; /* Color gris para el botón secundario */
-  border-color: #6c757d;
+.event-dialog .p-field .p-dropdown {
+  width: 100%;
 }
 
-.login-page .p-button-secondary:hover,
-.register-page .p-button-secondary:hover {
-  background-color: #5a6268; /* Color gris más oscuro al pasar el mouse */
-  border-color: #545b62;
+.event-dialog .p-dialog-footer {
+  text-align: right;
+  padding: 15px;
+}
+
+.event-dialog .p-dialog-footer .p-button {
+  margin-left: 10px;
 }
