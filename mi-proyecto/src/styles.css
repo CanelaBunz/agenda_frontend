@@ -4,6 +4,7 @@ html, body {
   padding: 0;
   height: 100%;
   overflow: hidden; /* Evita el desplazamiento global */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Estilos para el contenedor principal */
@@ -11,18 +12,20 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh; /* Ocupa toda la altura de la ventana */
-  background-color: #ffffff;
+  background-color: #f9f9f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Estilos para el banner */
 .banner {
   display: flex;
   align-items: center;
-  padding: 10px 20px;
-  background-color: #3498db;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   flex-shrink: 0; /* Evita que el banner se encoja */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .banner span {
@@ -44,29 +47,47 @@ html, body {
 
 /* Estilos para el sidebar */
 .sidebar {
-  width: 300px; /* Ancho fijo para el sidebar */
+  width: 320px; /* Ancho fijo para el sidebar */
   background-color: #f8f9fa;
-  border-right: 1px solid #ddd;
+  border-right: 1px solid #e0e0e0;
   overflow-y: auto; /* Desplazamiento vertical solo dentro del sidebar */
   height: 100%; /* Ocupa todo el alto disponible */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  padding-top: 15px;
+}
+
+.sidebar h3 {
+  margin: 0 0 15px 0;
+  padding: 0 20px 15px;
+  font-size: 1.3rem;
+  color: #2c3e50;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 /* Estilos para las tarjetas de contactos */
 .contact-cards {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 20px; /* Padding interno para las tarjetas */
+  gap: 12px;
+  padding: 0 20px 20px; /* Padding interno para las tarjetas */
 }
 
 .contact-card {
   background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.contact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-color: #bbb;
 }
 
 .contact-info {
@@ -87,13 +108,22 @@ html, body {
 .calendar-container {
   flex: 1; /* El calendario ocupa el espacio restante */
   overflow: hidden; /* Evita el desplazamiento en el calendario */
-  padding: 20px; /* Padding restaurado para el calendario */
+  padding: 25px; /* Padding restaurado para el calendario */
+  background-color: #ffffff;
+  border-radius: 10px;
+  margin: 15px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
 /* Estilos para el modo oscuro */
 .dark-mode {
+  background-color: #1a2530;
+  color: #ecf0f1;
+}
+
+.dark-mode .calendar-container {
   background-color: #2c3e50;
-  color: #000000;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 .dark-mode .sidebar {
@@ -174,4 +204,203 @@ html, body {
 
 .event-dialog .p-dialog-footer .p-button {
   margin-left: 10px;
+}
+
+/* Estilos para el menú de solicitudes de amistad */
+.friend-requests {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.friend-request-card, .friend-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px;
+}
+
+.friend-request-card:hover, .friend-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.friend-request-card .p-card-title {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.friend-request-card .p-card-subtitle {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.friend-request-card p {
+  margin: 8px 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.friend-request-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.friends-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+/* Mejoras generales de botones */
+.p-button {
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.p-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.p-button.p-button-success {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.p-button.p-button-danger {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+/* Estilos para el modo oscuro */
+.dark-mode .friend-request-card,
+.dark-mode .friend-card {
+  background-color: #34495e;
+  border-color: #2c3e50;
+  color: #ecf0f1;
+}
+
+.dark-mode .friend-request-card .p-card-title {
+  color: #ecf0f1;
+}
+
+.dark-mode .friend-request-card .p-card-subtitle {
+  color: #bdc3c7;
+}
+
+.dark-mode .friend-request-card p {
+  color: #ecf0f1;
+}
+
+/* Estilos para las páginas de login y registro */
+.login-page, .register-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f9f9f9;
+  background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+}
+
+.login-page .p-card, .register-page .p-card {
+  width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.login-page .p-card:hover, .register-page .p-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.login-page h2, .register-page h2 {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.login-page .p-fluid, .register-page .p-fluid {
+  padding: 20px;
+}
+
+.login-page .p-field, .register-page .p-field {
+  margin-bottom: 20px;
+}
+
+.login-page .p-field label, .register-page .p-field label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: block;
+  color: #2c3e50;
+}
+
+.login-page .p-inputtext, .register-page .p-inputtext {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+.login-page .p-inputtext:focus, .register-page .p-inputtext:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.login-page .p-button, .register-page .p-button {
+  margin-right: 10px;
+  padding: 10px 20px;
+}
+
+.login-page .error-message, .register-page .error-message {
+  color: #e74c3c;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: rgba(231, 76, 60, 0.1);
+  border-radius: 6px;
+  border-left: 4px solid #e74c3c;
+}
+
+/* Estilos para el modo oscuro en login y registro */
+.dark-mode .login-page, .dark-mode .register-page {
+  background: linear-gradient(135deg, #1a2530, #2c3e50);
+}
+
+.dark-mode .login-page .p-card, .dark-mode .register-page .p-card {
+  background-color: #34495e;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .login-page h2, .dark-mode .register-page h2 {
+  color: #ecf0f1;
+}
+
+.dark-mode .login-page .p-field label, .dark-mode .register-page .p-field label {
+  color: #ecf0f1;
+}
+
+.dark-mode .login-page .p-inputtext, .dark-mode .register-page .p-inputtext {
+  background-color: #2c3e50;
+  border-color: #1a2530;
+  color: #ecf0f1;
+}
+
+.dark-mode .login-page .p-inputtext:focus, .dark-mode .register-page .p-inputtext:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.4);
+}
+
+.dark-mode .login-page .error-message, .dark-mode .register-page .error-message {
+  background-color: rgba(231, 76, 60, 0.2);
+  color: #f9a7a1;
 }

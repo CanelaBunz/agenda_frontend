@@ -66,4 +66,32 @@ export default {
     deleteContact(id) {
         return apiClient.delete(`/contacts/${id}`);
     },
+    // Métodos para gestionar amigos
+    getFriends() {
+        return apiClient.get('/friends');
+    },
+    getPendingFriendRequests() {
+        return apiClient.get('/friends/requests/pending');
+    },
+    getSentFriendRequests() {
+        return apiClient.get('/friends/requests/sent');
+    },
+    sendFriendRequest(recipientEmail, description) {
+        return apiClient.post('/friends/request', null, {
+            params: {
+                recipientEmail,
+                description
+            }
+        });
+    },
+    respondToFriendRequest(id, response) {
+        return apiClient.put(`/friends/response/${id}`, null, {
+            params: {
+                response
+            }
+        });
+    },
+    removeFriend(id) {
+        return apiClient.delete(`/friends/${id}`);
+    },
 };

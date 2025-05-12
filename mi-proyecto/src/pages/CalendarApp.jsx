@@ -5,6 +5,7 @@ import ContactSidebar from "../components/ContactSidebar";
 import CalendarComponent from "../components/CalendarComponent";
 import EventDialog from "../components/EventDialog";
 import EventsModal from "../components/EventsModal";
+import FriendRequestMenu from "../components/FriendRequestMenu";
 import { Button } from "primereact/button";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -19,6 +20,7 @@ const CalendarApp = () => {
     const [eventDialogVisible, setEventDialogVisible] = useState(false);
     const [editEventDialogVisible, setEditEventDialogVisible] = useState(false);
     const [eventsModalVisible, setEventsModalVisible] = useState(false);
+    const [friendRequestMenuVisible, setFriendRequestMenuVisible] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [newEvent, setNewEvent] = useState({
         title: "",
@@ -258,6 +260,12 @@ const CalendarApp = () => {
                     style={{ marginLeft: "10px" }}
                 />
                 <Button
+                    label="Amigos"
+                    icon="pi pi-users"
+                    onClick={() => setFriendRequestMenuVisible(true)}
+                    style={{ marginLeft: "10px" }}
+                />
+                <Button
                     label="Cerrar Sesión"
                     icon="pi pi-sign-out"
                     onClick={logout}
@@ -288,6 +296,11 @@ const CalendarApp = () => {
                 onHide={closeEventsModal}
                 events={events}
                 onEventClick={openEditEventDialog}
+            />
+
+            <FriendRequestMenu
+                visible={friendRequestMenuVisible}
+                onHide={() => setFriendRequestMenuVisible(false)}
             />
 
             <div className="main-content">
