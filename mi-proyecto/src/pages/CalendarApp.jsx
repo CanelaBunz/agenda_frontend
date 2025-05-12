@@ -25,6 +25,7 @@ const CalendarApp = () => {
         description: "",
         start_time: null,
         end_time: null,
+        visibility: "PRIVATE", // Valor predeterminado para Spring Boot
     });
 
     // Cargar eventos al montar el componente
@@ -35,7 +36,12 @@ const CalendarApp = () => {
     // Obtener eventos desde el backend
     const fetchEvents = async () => {
         try {
-            const response = await api.getEvents();
+            // Calcular un rango de fechas (3 meses antes y después del mes actual)
+            const now = new Date();
+            const start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+            const end = new Date(now.getFullYear(), now.getMonth() + 4, 0);
+
+            const response = await api.getEvents(start, end);
             setEvents(response.data);
         } catch (error) {
             console.error("Error al cargar eventos:", error);
@@ -50,7 +56,13 @@ const CalendarApp = () => {
     // Cerrar el diálogo para crear un evento
     const closeEventDialog = () => {
         setEventDialogVisible(false);
-        setNewEvent({ title: "", description: "", start_time: null, end_time: null });
+        setNewEvent({ 
+            title: "", 
+            description: "", 
+            start_time: null, 
+            end_time: null,
+            visibility: "PRIVATE" // Valor predeterminado para Spring Boot
+        });
     };
 
     // Abrir el diálogo para editar un evento
@@ -59,8 +71,10 @@ const CalendarApp = () => {
         setNewEvent({
             title: event.title,
             description: event.extendedProps?.description || "",
-            start_time: new Date(event.start_time), // Convertir a fecha local
-            end_time: event.end_time ? new Date(event.end_time) : null, // Convertir a fecha local
+            // Compatibilidad con ambos backends (Laravel y Spring Boot)
+            start_time: new Date(event.startTime || event.start_time), // Convertir a fecha local
+            end_time: (event.endTime || event.end_time) ? new Date(event.endTime || event.end_time) : null, // Convertir a fecha local
+            visibility: event.extendedProps?.visibility || "PRIVATE",
         });
         setEditEventDialogVisible(true);
     };
@@ -69,7 +83,13 @@ const CalendarApp = () => {
     const closeEditEventDialog = () => {
         setEditEventDialogVisible(false);
         setSelectedEvent(null);
-        setNewEvent({ title: "", description: "", start_time: null, end_time: null });
+        setNewEvent({ 
+            title: "", 
+            description: "", 
+            start_time: null, 
+            end_time: null,
+            visibility: "PRIVATE" // Valor predeterminado para Spring Boot
+        });
     };
 
     // Abrir el modal de eventos
@@ -93,7 +113,8 @@ const CalendarApp = () => {
         if (!date) return null;
         // Ajusta la fecha a la zona horaria local antes de formatearla
         const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-        return localDate.toISOString().slice(0, 19).replace('T', ' '); // Formato: YYYY-MM-DD HH:MM:SS
+        // Formato ISO para Spring Boot: YYYY-MM-DDTHH:MM:SS.sssZ
+        return localDate.toISOString();
     };
 
     // Guardar un nuevo evento
@@ -103,10 +124,14 @@ const CalendarApp = () => {
             return;
         }
         try {
+            // Adaptar los datos para el backend de Spring Boot
             const eventData = {
-                ...newEvent,
-                start_time: formatDateForBackend(newEvent.start_time), // Formatear fecha
-                end_time: newEvent.end_time ? formatDateForBackend(newEvent.end_time) : null, // Formatear fecha (si existe)
+                title: newEvent.title,
+                description: newEvent.description,
+                // Usar los nombres de propiedades que espera Spring Boot
+                startTime: formatDateForBackend(newEvent.start_time),
+                endTime: newEvent.end_time ? formatDateForBackend(newEvent.end_time) : null,
+                visibility: newEvent.visibility || "PRIVATE",
             };
             console.log("Datos enviados al backend:", eventData); // Depuración
             await api.createEvent(eventData);
@@ -139,10 +164,15 @@ const CalendarApp = () => {
             return;
         }
         try {
+            // Adaptar los datos para el backend de Spring Boot
             const eventData = {
-                ...newEvent,
-                start_time: formatDateForBackend(newEvent.start_time), // Formatear fecha
-                end_time: newEvent.end_time ? formatDateForBackend(newEvent.end_time) : null, // Formatear fecha (si existe)
+                id: selectedEvent.id,
+                title: newEvent.title,
+                description: newEvent.description,
+                // Usar los nombres de propiedades que espera Spring Boot
+                startTime: formatDateForBackend(newEvent.start_time),
+                endTime: newEvent.end_time ? formatDateForBackend(newEvent.end_time) : null,
+                visibility: newEvent.visibility || "PRIVATE",
             };
             console.log("Datos enviados al backend:", eventData); // Depuración
             await api.updateEvent(selectedEvent.id, eventData);

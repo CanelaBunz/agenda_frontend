@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api', // URL de tu backend
+    baseURL: 'http://localhost:8081/api', // URL de tu backend Spring Boot
     headers: {
         'Content-Type': 'application/json',
     },
@@ -18,16 +18,32 @@ apiClient.interceptors.request.use((config) => {
 
 export default {
     register(userData) {
-        return apiClient.post('/register', userData);
+        return apiClient.post('/auth/register', userData);
     },
     login(credentials) {
-        return apiClient.post('/login', credentials);
+        return apiClient.post('/auth/login', credentials);
     },
     logout() {
-        return apiClient.post('/logout');
+        return apiClient.post('/auth/logout');
     },
-    getEvents() {
-        return apiClient.get('/events');
+    getEvents(start, end) {
+        // Si no se proporcionan fechas, usar un rango predeterminado (un mes)
+        if (!start || !end) {
+            const now = new Date();
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+            end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        }
+
+        // Formatear fechas a ISO para la API
+        const startISO = start instanceof Date ? start.toISOString() : start;
+        const endISO = end instanceof Date ? end.toISOString() : end;
+
+        return apiClient.get('/events', {
+            params: {
+                start: startISO,
+                end: endISO
+            }
+        });
     },
     createEvent(event) {
         return apiClient.post('/events', event);

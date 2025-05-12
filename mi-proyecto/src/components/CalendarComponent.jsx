@@ -10,11 +10,13 @@ const CalendarComponent = ({ events, onEventClick }) => {
     const formattedEvents = events.map((event) => ({
         id: event.id,
         title: event.title,
-        start: event.start_time, // Usa la propiedad start_time del backend
-        end: event.end_time, // Usa la propiedad end_time del backend
+        // Compatibilidad con ambos backends (Laravel y Spring Boot)
+        start: event.startTime || event.start_time,
+        end: event.endTime || event.end_time,
         extendedProps: {
             description: event.description || "",
             category: event.category || "",
+            visibility: event.visibility || "PRIVATE",
         },
     }));
 
