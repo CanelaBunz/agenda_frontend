@@ -122,6 +122,9 @@ export default {
     removeFriend(id) {
         return apiClient.delete(`/friends/${id}`);
     },
+    updateFriend(id, friendData) {
+        return apiClient.put(`/friends/${id}`, friendData);
+    },
 
     // Métodos para gestionar solicitudes de eventos
     getSentEventRequests() {

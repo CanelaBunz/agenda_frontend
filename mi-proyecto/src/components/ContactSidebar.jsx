@@ -21,17 +21,23 @@ const ContactSidebar = () => {
     notes: "",
   });
   const [editContact, setEditContact] = useState(null);
+  const [editFriend, setEditFriend] = useState(null);
   const [visibleDialog, setVisibleDialog] = useState(false);
+  const [visibleFriendDialog, setVisibleFriendDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [loadingEvents, setLoadingEvents] = useState(false);
+  const [newFriend, setNewFriend] = useState({
+    description: "",
+    phone: "",
+  });
   const toast = useRef(null);
 
   // Esquema de validación con Yup
   const contactSchema = yup.object().shape({
     name: yup.string().required("El nombre es obligatorio."),
     email: yup.string().email("Correo electrónico inválido.").required("El correo electrónico es obligatorio."),
-    phone: yup.string().optional(),
+    phone: yup.string().max(10, "El número de teléfono debe tener máximo 10 dígitos.").optional(),
     notes: yup.string().optional(),
   });
 
@@ -47,9 +53,9 @@ const ContactSidebar = () => {
     try {
       const response = await api.getContacts();
 
-      // Verifica si la respuesta tiene un campo `data` y es un array
-      if (response.data && Array.isArray(response.data.data)) {
-        setContacts(response.data.data); // Usa response.data.data
+      // Verifica si la respuesta tiene datos y es un array
+      if (response.data && Array.isArray(response.data)) {
+        setContacts(response.data); // Usa response.data directamente
       } else {
         console.error("La respuesta de la API no es un array:", response.data);
         setContacts([]); // Asignar un array vacío si la respuesta no es válida
@@ -111,10 +117,16 @@ const ContactSidebar = () => {
     }
   };
 
-  // Manejar cambios en los campos del formulario
+  // Manejar cambios en los campos del formulario de contactos
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewContact((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Manejar cambios en los campos del formulario de amigos
+  const handleFriendInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewFriend((prev) => ({ ...prev, [name]: value }));
   };
 
   // Mostrar notificaciones de éxito
@@ -157,11 +169,11 @@ const ContactSidebar = () => {
           if (editContact) {
             // Si es una edición, reemplaza el contacto existente
             return prevContacts.map((contact) =>
-              contact.id === editContact.id ? response.data.data : contact
+              contact.id === editContact.id ? response.data : contact
             );
           } else {
             // Si es un nuevo contacto, agrégalo al estado
-            return [...prevContacts, response.data.data];
+            return [...prevContacts, response.data];
           }
         });
       }
@@ -201,6 +213,16 @@ const ContactSidebar = () => {
     setVisibleDialog(true);
   };
 
+  // Abrir diálogo para editar un amigo
+  const openEditFriendDialog = (friend) => {
+    setEditFriend(friend);
+    setNewFriend({
+      description: friend.description || "",
+      phone: friend.phone || "",
+    });
+    setVisibleFriendDialog(true);
+  };
+
   // Eliminar un contacto
   const deleteContact = async (id) => {
     try {
@@ -210,6 +232,40 @@ const ContactSidebar = () => {
     } catch (error) {
       console.error("Error al eliminar el contacto:", error);
       showError("Error al eliminar el contacto.");
+    }
+  };
+
+  // Guardar o actualizar un amigo
+  const saveFriend = async () => {
+    try {
+      // Validar que el número de teléfono no tenga más de 10 dígitos
+      if (newFriend.phone && newFriend.phone.length > 10) {
+        showError("El número de teléfono debe tener máximo 10 dígitos.");
+        return;
+      }
+
+      const response = await api.updateFriend(editFriend.id, newFriend);
+
+      if (response.data) {
+        // Actualizar el amigo en la lista de amigos
+        setFriends((prevFriends) => {
+          return prevFriends.map((friend) =>
+            friend.id === editFriend.id ? { ...friend, ...newFriend } : friend
+          );
+        });
+
+        showSuccess("Amigo actualizado correctamente.");
+      }
+
+      setVisibleFriendDialog(false);
+      setNewFriend({ description: "", phone: "" });
+      setEditFriend(null);
+
+      // Recargar la lista de amigos para asegurar que los cambios se reflejen
+      fetchFriends();
+    } catch (error) {
+      console.error("Error al guardar el amigo:", error);
+      showError("Error al guardar el amigo.");
     }
   };
 
@@ -282,12 +338,24 @@ const ContactSidebar = () => {
                       }
                     >
                       <div className="friend-details">
-                        <Button
-                          label="Ver Eventos"
-                          icon="pi pi-calendar"
-                          onClick={() => fetchFriendEvents(friend.id)}
-                          className="p-button-sm"
-                        />
+                        <div className="friend-info">
+                          {friend.description && <p><strong>Descripción:</strong> {friend.description}</p>}
+                          {friend.phone && <p><strong>Teléfono:</strong> {friend.phone}</p>}
+                        </div>
+                        <div className="friend-actions">
+                          <Button
+                            icon="pi pi-pencil"
+                            className="p-button-text"
+                            onClick={() => openEditFriendDialog(friend)}
+                            tooltip="Editar amigo"
+                          />
+                          <Button
+                            label="Ver Eventos"
+                            icon="pi pi-calendar"
+                            onClick={() => fetchFriendEvents(friend.id)}
+                            className="p-button-sm"
+                          />
+                        </div>
 
                         {selectedFriend === friend.id && (
                           <div className="friend-events">
@@ -373,6 +441,44 @@ const ContactSidebar = () => {
           <Button
             label={editContact ? "Actualizar" : "Guardar"}
             onClick={saveContact}
+          />
+        </div>
+      </Dialog>
+
+      {/* Diálogo para editar amigos */}
+      <Dialog
+        header="Editar Amigo"
+        visible={visibleFriendDialog}
+        onHide={() => {
+          setVisibleFriendDialog(false);
+          setEditFriend(null);
+          setNewFriend({ description: "", phone: "" });
+        }}
+      >
+        <div className="p-fluid">
+          <div className="p-field">
+            <label htmlFor="description">Descripción</label>
+            <InputText
+              id="description"
+              name="description"
+              value={newFriend.description}
+              onChange={handleFriendInputChange}
+            />
+          </div>
+          <div className="p-field">
+            <label htmlFor="phone">Teléfono</label>
+            <InputText
+              id="phone"
+              name="phone"
+              value={newFriend.phone}
+              onChange={handleFriendInputChange}
+              maxLength={10}
+            />
+            <small>Máximo 10 dígitos</small>
+          </div>
+          <Button
+            label="Actualizar"
+            onClick={saveFriend}
           />
         </div>
       </Dialog>

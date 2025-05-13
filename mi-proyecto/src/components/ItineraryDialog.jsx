@@ -36,11 +36,24 @@ const ItineraryDialog = ({ visible, onHide, itinerary, onChange, onSave, onDelet
         setNewEvent(prev => ({ ...prev, [name]: value }));
     };
 
-    const addEvent = () => {
+    const validateEvent = () => {
         if (!newEvent.title || !newEvent.start_time) {
             alert("Por favor, completa al menos el título y la fecha de inicio del evento.");
-            return;
+            return false;
         }
+        return true;
+    };
+
+    const saveEvent = () => {
+        if (!validateEvent()) return;
+
+        // Añadir el evento al itinerario
+        const updatedEvents = [...(itinerary.events || []), { ...newEvent }];
+        onChange({ target: { name: "events", value: updatedEvents } });
+    };
+
+    const addEvent = () => {
+        if (!validateEvent()) return;
 
         // Añadir el evento al itinerario
         const updatedEvents = [...(itinerary.events || []), { ...newEvent }];
@@ -244,13 +257,20 @@ const ItineraryDialog = ({ visible, onHide, itinerary, onChange, onSave, onDelet
                             />
                         </div>
                     </div>
-                    <Button
-                        label="Añadir Evento"
-                        icon="pi pi-plus"
-                        onClick={addEvent}
-                        className="p-button-success"
-                        style={{ marginTop: '1rem' }}
-                    />
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                        <Button
+                            label="Guardar Evento"
+                            icon="pi pi-save"
+                            onClick={saveEvent}
+                            className="p-button-primary"
+                        />
+                        <Button
+                            label="Añadir Evento"
+                            icon="pi pi-plus"
+                            onClick={addEvent}
+                            className="p-button-success"
+                        />
+                    </div>
                 </div>
             </div>
 
