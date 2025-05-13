@@ -4,10 +4,16 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
+import { TabView, TabPanel } from "primereact/tabview";
+import { Accordion, AccordionTab } from "primereact/accordion";
 import * as yup from "yup";
 
 const ContactSidebar = () => {
   const [contacts, setContacts] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const [friendEvents, setFriendEvents] = useState([]);
+  const [activeTab, setActiveTab] = useState(0);
+  const [selectedFriend, setSelectedFriend] = useState(null);
   const [newContact, setNewContact] = useState({
     name: "",
     email: "",
@@ -17,6 +23,8 @@ const ContactSidebar = () => {
   const [editContact, setEditContact] = useState(null);
   const [visibleDialog, setVisibleDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingFriends, setLoadingFriends] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(false);
   const toast = useRef(null);
 
   // Esquema de validación con Yup
@@ -27,9 +35,10 @@ const ContactSidebar = () => {
     notes: yup.string().optional(),
   });
 
-  // Obtener contactos al cargar el componente
+  // Obtener contactos y amigos al cargar el componente
   useEffect(() => {
     fetchContacts();
+    fetchFriends();
   }, []);
 
   // Función para obtener contactos
@@ -51,6 +60,54 @@ const ContactSidebar = () => {
       setContacts([]); // Asignar un array vacío en caso de error
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para obtener amigos
+  const fetchFriends = async () => {
+    setLoadingFriends(true);
+    try {
+      const response = await api.getFriends();
+      if (response.data) {
+        setFriends(response.data);
+      } else {
+        console.error("La respuesta de la API no es válida:", response.data);
+        setFriends([]);
+      }
+    } catch (error) {
+      console.error("Error al cargar amigos:", error);
+      showError("Error al cargar amigos.");
+      setFriends([]);
+    } finally {
+      setLoadingFriends(false);
+    }
+  };
+
+  // Función para obtener eventos de un amigo
+  const fetchFriendEvents = async (friendId) => {
+    setLoadingEvents(true);
+    try {
+      // Obtener eventos del amigo usando el nuevo método específico
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+
+      const response = await api.getFriendEvents(friendId, start, end);
+
+      // Verificar que la respuesta es un array
+      if (response.data && Array.isArray(response.data)) {
+        setFriendEvents(response.data);
+      } else {
+        console.error("La respuesta de la API no es un array:", response.data);
+        setFriendEvents([]);
+      }
+      setSelectedFriend(friendId);
+    } catch (error) {
+      console.error("Error al cargar eventos del amigo:", error);
+      showError("Error al cargar eventos del amigo.");
+      setFriendEvents([]);
+    } finally {
+      setLoadingEvents(false);
     }
   };
 
@@ -159,46 +216,113 @@ const ContactSidebar = () => {
   return (
     <div className="sidebar">
       <Toast ref={toast} />
-      <h3>Contactos</h3>
-      <Button
-        label="Nuevo Contacto"
-        icon="pi pi-plus"
-        onClick={() => {
-          setEditContact(null);
-          setNewContact({ name: "", email: "", phone: "", notes: "" });
-          setVisibleDialog(true);
-        }}
-        className="p-button-sm"
-      />
+      <h3>Contactos y Amigos</h3>
 
-      {loading ? (
-        <p>Cargando contactos...</p>
-      ) : (
-        <div className="contact-cards">
-          {contacts.map((contact) => (
-            <div key={contact.id} className="contact-card">
-              <div className="contact-info">
-                <strong>{contact.name}</strong>
-                <p>{contact.email}</p>
-                <p>{contact.phone}</p>
-                <p>{contact.notes}</p>
-              </div>
-              <div className="contact-actions">
-                <Button
-                  icon="pi pi-pencil"
-                  className="p-button-text"
-                  onClick={() => openEditDialog(contact)}
-                />
-                <Button
-                  icon="pi pi-trash"
-                  className="p-button-text"
-                  onClick={() => deleteContact(contact.id)}
-                />
-              </div>
+      <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)}>
+        <TabPanel header="Contactos">
+          <Button
+            label="Nuevo Contacto"
+            icon="pi pi-plus"
+            onClick={() => {
+              setEditContact(null);
+              setNewContact({ name: "", email: "", phone: "", notes: "" });
+              setVisibleDialog(true);
+            }}
+            className="p-button-sm"
+            style={{ marginBottom: "10px" }}
+          />
+
+          {loading ? (
+            <p>Cargando contactos...</p>
+          ) : (
+            <div className="contact-cards">
+              {contacts.map((contact) => (
+                <div key={contact.id} className="contact-card">
+                  <div className="contact-info">
+                    <strong>{contact.name}</strong>
+                    <p>{contact.email}</p>
+                    <p>{contact.phone}</p>
+                    <p>{contact.notes}</p>
+                  </div>
+                  <div className="contact-actions">
+                    <Button
+                      icon="pi pi-pencil"
+                      className="p-button-text"
+                      onClick={() => openEditDialog(contact)}
+                    />
+                    <Button
+                      icon="pi pi-trash"
+                      className="p-button-text"
+                      onClick={() => deleteContact(contact.id)}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
+        </TabPanel>
+
+        <TabPanel header="Amigos">
+          {loadingFriends ? (
+            <p>Cargando amigos...</p>
+          ) : (
+            <div className="friends-section">
+              {friends.length === 0 ? (
+                <p>No tienes amigos agregados aún.</p>
+              ) : (
+                <Accordion>
+                  {friends.map((friend) => (
+                    <AccordionTab 
+                      key={friend.id} 
+                      header={
+                        <div className="friend-header">
+                          <span>{friend.name}</span>
+                          <span className="friend-email">{friend.email}</span>
+                        </div>
+                      }
+                    >
+                      <div className="friend-details">
+                        <Button
+                          label="Ver Eventos"
+                          icon="pi pi-calendar"
+                          onClick={() => fetchFriendEvents(friend.id)}
+                          className="p-button-sm"
+                        />
+
+                        {selectedFriend === friend.id && (
+                          <div className="friend-events">
+                            <h4>Eventos de {friend.name}</h4>
+                            {loadingEvents ? (
+                              <p>Cargando eventos...</p>
+                            ) : (
+                              <div>
+                                {friendEvents.length === 0 ? (
+                                  <p>No hay eventos disponibles.</p>
+                                ) : (
+                                  <ul className="event-list">
+                                    {friendEvents.map((event) => (
+                                      <li key={event.id} className="event-item">
+                                        <div className="event-title">{event.title}</div>
+                                        <div className="event-time">
+                                          {new Date(event.startTime || event.start_time).toLocaleString()}
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </AccordionTab>
+                  ))}
+                </Accordion>
+              )}
+            </div>
+          )}
+        </TabPanel>
+      </TabView>
 
       <Dialog
         header={editContact ? "Editar Contacto" : "Nuevo Contacto"}

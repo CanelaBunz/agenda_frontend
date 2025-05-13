@@ -4,6 +4,7 @@ import { InputText } from "primereact/inputtext";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
+import { RadioButton } from "primereact/radiobutton";
 
 const EventDialog = ({ visible, onHide, event, onChange, onSave, onDelete, isEdit }) => {
     const handleInputChange = (e) => {
@@ -86,6 +87,41 @@ const EventDialog = ({ visible, onHide, event, onChange, onSave, onDelete, isEdi
                         dateFormat="dd/mm/yy"
                         placeholder="Selecciona la fecha de finalización"
                     />
+                </div>
+                <div className="p-field">
+                    <label className="p-mb-2">Visibilidad</label>
+                    <div className="p-formgroup-inline">
+                        <div className="p-field-radiobutton">
+                            <RadioButton 
+                                inputId="visibility1" 
+                                name="visibility" 
+                                value="PRIVATE" 
+                                onChange={handleInputChange} 
+                                checked={event.visibility === "PRIVATE"} 
+                            />
+                            <label htmlFor="visibility1">Privado</label>
+                        </div>
+                        <div className="p-field-radiobutton">
+                            <RadioButton 
+                                inputId="visibility2" 
+                                name="visibility" 
+                                value="FRIENDS_ONLY" 
+                                onChange={handleInputChange} 
+                                checked={event.visibility === "FRIENDS_ONLY"} 
+                            />
+                            <label htmlFor="visibility2">Solo amigos</label>
+                        </div>
+                        <div className="p-field-radiobutton">
+                            <RadioButton 
+                                inputId="visibility3" 
+                                name="visibility" 
+                                value="PUBLIC" 
+                                onChange={handleInputChange} 
+                                checked={event.visibility === "PUBLIC"} 
+                            />
+                            <label htmlFor="visibility3">Público</label>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div className="p-dialog-footer">

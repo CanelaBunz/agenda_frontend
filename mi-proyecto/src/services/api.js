@@ -54,6 +54,34 @@ export default {
     deleteEvent(id) {
         return apiClient.delete(`/events/${id}`);
     },
+    getItineraries(start, end) {
+        // Si no se proporcionan fechas, usar un rango predeterminado (un mes)
+        if (!start || !end) {
+            const now = new Date();
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+            end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        }
+
+        // Formatear fechas a ISO para la API
+        const startISO = start instanceof Date ? start.toISOString() : start;
+        const endISO = end instanceof Date ? end.toISOString() : end;
+
+        return apiClient.get('/itineraries', {
+            params: {
+                start: startISO,
+                end: endISO
+            }
+        });
+    },
+    createItinerary(itinerary) {
+        return apiClient.post('/itineraries', itinerary);
+    },
+    updateItinerary(id, itinerary) {
+        return apiClient.put(`/itineraries/${id}`, itinerary);
+    },
+    deleteItinerary(id) {
+        return apiClient.delete(`/itineraries/${id}`);
+    },
     getContacts() {
         return apiClient.get('/contacts');
     },
@@ -93,5 +121,52 @@ export default {
     },
     removeFriend(id) {
         return apiClient.delete(`/friends/${id}`);
+    },
+
+    // Métodos para gestionar solicitudes de eventos
+    getSentEventRequests() {
+        return apiClient.get('/event-requests/sent');
+    },
+    getReceivedEventRequests() {
+        return apiClient.get('/event-requests/received');
+    },
+    getPendingEventRequests() {
+        return apiClient.get('/event-requests/pending');
+    },
+    sendEventRequest(eventId, recipientId) {
+        return apiClient.post('/event-requests/send', null, {
+            params: {
+                eventId,
+                recipientId
+            }
+        });
+    },
+
+    // Método para obtener eventos de un amigo específico
+    getFriendEvents(friendId, start, end) {
+        // Si no se proporcionan fechas, usar un rango predeterminado (un mes)
+        if (!start || !end) {
+            const now = new Date();
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+            end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        }
+
+        // Formatear fechas a ISO para la API
+        const startISO = start instanceof Date ? start.toISOString() : start;
+        const endISO = end instanceof Date ? end.toISOString() : end;
+
+        return apiClient.get(`/events/friend/${friendId}`, {
+            params: {
+                start: startISO,
+                end: endISO
+            }
+        });
+    },
+    respondToEventRequest(requestId, response) {
+        return apiClient.put(`/event-requests/respond/${requestId}`, null, {
+            params: {
+                response
+            }
+        });
     },
 };
